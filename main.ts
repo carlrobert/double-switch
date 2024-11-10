@@ -2,16 +2,19 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
-	mySetting: string;
+interface DoubleSwitchSettings {
+	myDarkModeThemeName: string;
+	myLightModeThemeName: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: DoubleSwitchSettings = {
+	myDarkModeThemeName: 'Blackbird',
+	myLightModeThemeName: 'Primary'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class DoubleSwitchPlugin extends Plugin {
+	settings: DoubleSwitchSettings;
+	inDarkMode = document.body.hasClass("theme-dark");
 
 	async onload() {
 		await this.loadSettings();
@@ -68,14 +71,21 @@ export default class MyPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SampleSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+		this.app.workspace.on("css-change", () => {
+			const darkModeNow = document.body.hasClass("theme-dark");
+			if (this.inDarkMode != darkModeNow) {
+				console.log('darkMode was, is', this.inDarkMode, darkModeNow);
+				this.inDarkMode = darkModeNow;
+				if (darkModeNow) {
+					//@ts-ignore
+					this.app.customCss.setTheme(this.settings.myDarkModeThemeName);
+				} else {
+					//@ts-ignore
+					this.app.customCss.setTheme(this.settings.myLightModeThemeName);
+				}
+			}
 		});
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 	onunload() {
@@ -89,6 +99,7 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
 }
 
 class SampleModal extends Modal {
@@ -97,38 +108,54 @@ class SampleModal extends Modal {
 	}
 
 	onOpen() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.setText('Woah!');
 	}
 
 	onClose() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: DoubleSwitchPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: DoubleSwitchPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Use this theme with dark mode')
+			.setDesc('Enter the name of an installed theme')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Default')
+				.setValue(this.plugin.settings.myDarkModeThemeName)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.myDarkModeThemeName = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Use this theme with with light mode')
+			.setDesc('Enter the name of installed theme')
+			.addText(text => text
+				.setPlaceholder('Default')
+				.setValue(this.plugin.settings.myLightModeThemeName)
+				.onChange(async (value) => {
+					this.plugin.settings.myLightModeThemeName = value;
+					await this.plugin.saveSettings();
+				}));
+
 	}
 }
+
+
+// SOURCES
+// css-change listener: https://github.com/guopenghui/obsidian-quiet-outline/blob/4fab1f68b33e1ecf1fd8248d6d67faf18a213096/src/plugin.ts#L72
