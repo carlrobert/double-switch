@@ -74,18 +74,22 @@ export default class DoubleSwitchPlugin extends Plugin {
 		this.app.workspace.on("css-change", () => {
 			const darkModeNow = document.body.hasClass("theme-dark");
 			if (this.inDarkMode != darkModeNow) {
-				console.log('darkMode was, is', this.inDarkMode, darkModeNow);
 				this.inDarkMode = darkModeNow;
 				if (darkModeNow) {
-					//@ts-ignore
-					this.app.customCss.setTheme(this.settings.myDarkModeThemeName);
+					this.setTheme(this.settings.myDarkModeThemeName);
 				} else {
-					//@ts-ignore
-					this.app.customCss.setTheme(this.settings.myLightModeThemeName);
+					this.setTheme(this.settings.myLightModeThemeName);
 				}
 			}
 		});
 
+	}
+
+	setTheme(themeName: string) {
+		if (themeName !== "Don't switch") {
+			//@ts-ignore
+			this.app.customCss.setTheme(themeName);
+		}
 	}
 
 	onunload() {
@@ -120,6 +124,8 @@ class SampleModal extends Modal {
 
 class SampleSettingTab extends PluginSettingTab {
 	plugin: DoubleSwitchPlugin;
+	DEFAULT_THEME_KEY = "";
+	DEFAULT_THEME_TEXT = "Don't switch";
 
 	constructor(app: App, plugin: DoubleSwitchPlugin) {
 		super(app, plugin);
@@ -134,12 +140,9 @@ class SampleSettingTab extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName('Theme to use with light mode').setDesc('Pick from installed themes')
 			.addDropdown(async dropdown => {
-				dropdown.addOption('Blackbird', 'Blackbird');
-				dropdown.addOption('Primary', 'Primary')
-				dropdown.addOption('Default', 'Default')
-				// for (const key of Object.values(source)) {
-				// 	dropdown.addOption(key, key);
-				// }
+				for (const key of Object.values(this.getThemes())) {
+					dropdown.addOption(key, this.getThemeNames(key));
+				}
 				dropdown.setValue(this.plugin.settings.myLightModeThemeName);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.myLightModeThemeName = value;
@@ -150,12 +153,9 @@ class SampleSettingTab extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName('Theme to use with dark mode').setDesc('Pick from installed themes')
 			.addDropdown(async dropdown => {
-				dropdown.addOption('Blackbird', 'Blackbird');
-				dropdown.addOption('Primary', 'Primary')
-				dropdown.addOption('Default', 'Default')
-				// for (const key of Object.values(source)) {
-				// 	dropdown.addOption(key, key);
-				// }
+				for (const key of Object.values(this.getThemes())) {
+					dropdown.addOption(key, this.getThemeNames(key));
+				}
 				dropdown.setValue(this.plugin.settings.myDarkModeThemeName);
 				dropdown.onChange(async (value) => {
 					this.plugin.settings.myDarkModeThemeName = value;
@@ -165,27 +165,18 @@ class SampleSettingTab extends PluginSettingTab {
 
 	}
 
-	// addDropDown from https://github.com/mirnovov/obsidian-homepage
-	addDropdown(name: string, desc: string, setting: HomepageKey<string>, source: object, callback?: Callback<string>): Setting {
-		const dropdown = new Setting(this.containerEl)
-			.setName(name).setDesc(desc)
-			.addDropdown(async dropdown => {
-				for (const key of Object.values(source)) {
-					dropdown.addOption(key, key);
-				}
-				dropdown.setValue(this.plugin.homepage.data[setting]);
-				dropdown.onChange(async option => {
-					this.plugin.homepage.data[setting] = option;
-					await this.plugin.homepage.save();
-					if (callback) callback(option);
-				});
-			});
-
-		this.elements[setting] = dropdown;
-		return dropdown;
+	getThemes(): any[] {
+		//@ts-ignore
+		return [this.DEFAULT_THEME_KEY, ...Object.keys(this.app.customCss.themes), ...this.app.customCss.oldThemes];
 	}
+
+	getThemeNames(item: any): string {
+		if (item === this.DEFAULT_THEME_KEY) {
+			return this.DEFAULT_THEME_TEXT;
+		} else {
+			return item;
+		}
+	}
+
+
 }
-
-
-// SOURCES
-// css-change listener: https://github.com/guopenghui/obsidian-quiet-outline/blob/4fab1f68b33e1ecf1fd8248d6d67faf18a213096/src/plugin.ts#L72
