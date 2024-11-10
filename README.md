@@ -10,4 +10,3 @@ You can pick among the themes you have installed at any time.
 This plugin is based on
 - https://github.com/obsidianmd/obsidian-sample-plugin
 - https://github.com/kenset/obsidian-theme-picker
-

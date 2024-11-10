@@ -1,6 +1,6 @@
 {
 	"id": "double-switch",
-	"name": "Use different themes with light and dark mode",
+	"name": "Auto switch themes between dark/light mode",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Toggling dark/light mode switches themes automatically",

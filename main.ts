@@ -131,28 +131,58 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		new Setting(containerEl)
-			.setName('Use this theme with dark mode')
-			.setDesc('Enter the name of an installed theme')
-			.addText(text => text
-				.setPlaceholder('Default')
-				.setValue(this.plugin.settings.myDarkModeThemeName)
-				.onChange(async (value) => {
-					this.plugin.settings.myDarkModeThemeName = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Use this theme with with light mode')
-			.setDesc('Enter the name of installed theme')
-			.addText(text => text
-				.setPlaceholder('Default')
-				.setValue(this.plugin.settings.myLightModeThemeName)
-				.onChange(async (value) => {
+		new Setting(this.containerEl)
+			.setName('Theme to use with light mode').setDesc('Pick from installed themes')
+			.addDropdown(async dropdown => {
+				dropdown.addOption('Blackbird', 'Blackbird');
+				dropdown.addOption('Primary', 'Primary')
+				dropdown.addOption('Default', 'Default')
+				// for (const key of Object.values(source)) {
+				// 	dropdown.addOption(key, key);
+				// }
+				dropdown.setValue(this.plugin.settings.myLightModeThemeName);
+				dropdown.onChange(async (value) => {
 					this.plugin.settings.myLightModeThemeName = value;
 					await this.plugin.saveSettings();
-				}));
+				});
+			});
 
+		new Setting(this.containerEl)
+			.setName('Theme to use with dark mode').setDesc('Pick from installed themes')
+			.addDropdown(async dropdown => {
+				dropdown.addOption('Blackbird', 'Blackbird');
+				dropdown.addOption('Primary', 'Primary')
+				dropdown.addOption('Default', 'Default')
+				// for (const key of Object.values(source)) {
+				// 	dropdown.addOption(key, key);
+				// }
+				dropdown.setValue(this.plugin.settings.myDarkModeThemeName);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.myDarkModeThemeName = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
+	}
+
+	// addDropDown from https://github.com/mirnovov/obsidian-homepage
+	addDropdown(name: string, desc: string, setting: HomepageKey<string>, source: object, callback?: Callback<string>): Setting {
+		const dropdown = new Setting(this.containerEl)
+			.setName(name).setDesc(desc)
+			.addDropdown(async dropdown => {
+				for (const key of Object.values(source)) {
+					dropdown.addOption(key, key);
+				}
+				dropdown.setValue(this.plugin.homepage.data[setting]);
+				dropdown.onChange(async option => {
+					this.plugin.homepage.data[setting] = option;
+					await this.plugin.homepage.save();
+					if (callback) callback(option);
+				});
+			});
+
+		this.elements[setting] = dropdown;
+		return dropdown;
 	}
 }
 
