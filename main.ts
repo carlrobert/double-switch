@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS: DoubleSwitchSettings = {
 
 export default class DoubleSwitchPlugin extends Plugin {
 	settings: DoubleSwitchSettings;
-	inDarkMode = document.body.hasClass("theme-dark");
+	darkModeBefore = document.body.hasClass("theme-dark");
 
 	async onload() {
 		await this.loadSettings();
@@ -25,17 +25,18 @@ export default class DoubleSwitchPlugin extends Plugin {
 		this.addSettingTab(new MySettingTab(this.app, this));
 
 		// Core logic of the app
-		this.app.workspace.on("css-change", () => {
-			const darkModeNow = document.body.hasClass("theme-dark");
-			if (this.inDarkMode != darkModeNow) {
-				this.inDarkMode = darkModeNow;
-				if (darkModeNow) {
-					this.setTheme(this.settings.myDarkModeThemeName);
-				} else {
-					this.setTheme(this.settings.myLightModeThemeName);
+		this.registerEvent(this.app.workspace.on('css-change',
+			() => {
+				const darkModeNow = document.body.hasClass("theme-dark");
+				if (this.darkModeBefore != darkModeNow) {
+					this.darkModeBefore = darkModeNow;
+					if (darkModeNow) {
+						this.setTheme(this.settings.myDarkModeThemeName);
+					} else {
+						this.setTheme(this.settings.myLightModeThemeName);
+					}
 				}
-			}
-		});
+			}));
 
 	}
 
