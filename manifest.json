@@ -6,6 +6,5 @@
 	"description": "Toggling dark/light mode switches themes automatically",
 	"author": "Robert Storlind",
 	"authorUrl": "https://github.com/carlrobert",
-	"fundingUrl": "https://github.com/carlrobert/double-switch",
 	"isDesktopOnly": false
 }
