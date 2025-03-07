@@ -5,39 +5,42 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 interface DoubleSwitchSettings {
 	myDarkModeThemeName: string;
 	myLightModeThemeName: string;
+	startupCheck: boolean;
 }
 
 const NOSWITCH = "Don't switch";
 
 const DEFAULT_SETTINGS: DoubleSwitchSettings = {
 	myDarkModeThemeName: NOSWITCH,
-	myLightModeThemeName: NOSWITCH
+	myLightModeThemeName: NOSWITCH,
+	startupCheck: false
 }
 
 export default class DoubleSwitchPlugin extends Plugin {
 	settings: DoubleSwitchSettings;
-	darkModeBefore = document.body.hasClass("theme-dark");
+	darkModeBefore = document.body.hasClass('theme-dark');
 
-	async onload() {
+	async onload(app: App) {
 		await this.loadSettings();
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
+		// Add a plugin settings tab
 		this.addSettingTab(new MySettingTab(this.app, this));
 
 		// Core logic of the app
-		this.registerEvent(this.app.workspace.on('css-change',
-			() => {
-				const darkModeNow = document.body.hasClass("theme-dark");
-				if (this.darkModeBefore != darkModeNow) {
-					this.darkModeBefore = darkModeNow;
-					if (darkModeNow) {
-						this.setTheme(this.settings.myDarkModeThemeName);
-					} else {
-						this.setTheme(this.settings.myLightModeThemeName);
-					}
-				}
-			}));
+		this.registerEvent(this.app.workspace.on('css-change', () => {
+			const darkModeNow = document.body.hasClass('theme-dark');
+			if (this.darkModeBefore != darkModeNow) {
+				this.darkModeBefore = darkModeNow;
+				this.setTheme(darkModeNow ? this.settings.myDarkModeThemeName : this.settings.myLightModeThemeName);
+			}
+		}));
 
+		this.app.workspace.onLayoutReady(() => {
+			if (this.settings.startupCheck) {
+				const darkModeNow = document.body.hasClass('theme-dark');
+				this.setTheme(darkModeNow ? this.settings.myDarkModeThemeName : this.settings.myLightModeThemeName);
+			}
+		});
 	}
 
 	setTheme(themeName: string) {
@@ -47,9 +50,7 @@ export default class DoubleSwitchPlugin extends Plugin {
 		}
 	}
 
-	onunload() {
-
-	}
+	onunload() { }
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -64,8 +65,8 @@ export default class DoubleSwitchPlugin extends Plugin {
 
 class MySettingTab extends PluginSettingTab {
 	plugin: DoubleSwitchPlugin;
-	DEFAULT_THEME_KEY = "";
-	DEFAULT_THEME_TEXT = "Default";
+	DEFAULT_THEME_KEY = '';
+	DEFAULT_THEME_TEXT = 'Default';
 
 	constructor(app: App, plugin: DoubleSwitchPlugin) {
 		super(app, plugin);
@@ -78,7 +79,7 @@ class MySettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(this.containerEl)
-			.setName('Theme to use with light mode').setDesc('Pick from installed themes')
+			.setName('Theme to use with light mode').setDesc('Pick from the installed themes')
 			.addDropdown(async dropdown => {
 				dropdown.addOption(NOSWITCH, NOSWITCH)
 				for (const key of Object.values(this.getThemes())) {
@@ -92,7 +93,7 @@ class MySettingTab extends PluginSettingTab {
 			});
 
 		new Setting(this.containerEl)
-			.setName('Theme to use with dark mode').setDesc('Pick from installed themes')
+			.setName('Theme to use with dark mode').setDesc('Pick from the installed themes')
 			.addDropdown(async dropdown => {
 				dropdown.addOption(NOSWITCH, NOSWITCH)
 				for (const key of Object.values(this.getThemes())) {
@@ -105,6 +106,15 @@ class MySettingTab extends PluginSettingTab {
 				});
 			});
 
+		new Setting(this.containerEl)
+			.setName('Check dark/light mode at startup').setDesc('Useful if the Base Color Scheme is set to "Adapt to system"')
+			.addToggle(async toggle => {
+				toggle.setValue(this.plugin.settings.startupCheck);
+				toggle.onChange(async (value) => {
+					this.plugin.settings.startupCheck = value;
+					await this.plugin.saveSettings();
+				});
+			});
 	}
 
 	getThemes(): any[] {
