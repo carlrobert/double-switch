@@ -20,7 +20,7 @@ export default class DoubleSwitchPlugin extends Plugin {
 	settings: DoubleSwitchSettings;
 	darkModeBefore = document.body.hasClass('theme-dark');
 
-	async onload(app: App) {
+	async onload() {
 		await this.loadSettings();
 
 		// Add a plugin settings tab
