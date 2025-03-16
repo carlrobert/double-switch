@@ -1,14 +1,13 @@
 # Double-Switch Plugin
 
-This plugin lets you associate different themes with light and dark mode.
+Do you switch between Dark and Light modes but prefer different themes? Then this plugin might be for you. It automatically switches themes when the dark/light mode setting changes.
+Choose your themes in the settings.
 
-Toggling light or dark mode automatically switches the theme. That's it.
+![Plugin Settings](https://github.com/carlrobert/double-switch/blob/main/Screenshot%202025-03-16%2016.32.43.png)
 
-You can pick among the themes you have installed at any time.
+---
 
-# Known issues
-Feature interaction:
-- In the Obsidian Settings modal dialog for Appearance, you can switch between dark and light mode. While the dialog is open, the theme name does not update even though a theme change happens as expected based on your settings for this plugin. If you exit the settings dialog and visit it again, the theme name has indeed updated.
+Thanks to user ProudBenzene for suggesting an improvement to the plugin.
 
 # Sources
 This plugin is based on

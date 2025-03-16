@@ -79,21 +79,7 @@ class MySettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(this.containerEl)
-			.setName('Theme to use with light mode').setDesc('Pick from the installed themes')
-			.addDropdown(async dropdown => {
-				dropdown.addOption(NOSWITCH, NOSWITCH)
-				for (const key of Object.values(this.getThemes())) {
-					dropdown.addOption(key, this.getThemeNames(key));
-				}
-				dropdown.setValue(this.plugin.settings.myLightModeThemeName);
-				dropdown.onChange(async (value) => {
-					this.plugin.settings.myLightModeThemeName = value;
-					await this.plugin.saveSettings();
-				});
-			});
-
-		new Setting(this.containerEl)
-			.setName('Theme to use with dark mode').setDesc('Pick from the installed themes')
+			.setName('Theme to use with dark mode').setDesc('Pick from your installed themes')
 			.addDropdown(async dropdown => {
 				dropdown.addOption(NOSWITCH, NOSWITCH)
 				for (const key of Object.values(this.getThemes())) {
@@ -107,7 +93,21 @@ class MySettingTab extends PluginSettingTab {
 			});
 
 		new Setting(this.containerEl)
-			.setName('Check dark/light mode at startup').setDesc('Useful if the Base Color Scheme is set to "Adapt to system"')
+			.setName('Theme to use with light mode').setDesc('Pick from your installed themes')
+			.addDropdown(async dropdown => {
+				dropdown.addOption(NOSWITCH, NOSWITCH)
+				for (const key of Object.values(this.getThemes())) {
+					dropdown.addOption(key, this.getThemeNames(key));
+				}
+				dropdown.setValue(this.plugin.settings.myLightModeThemeName);
+				dropdown.onChange(async (value) => {
+					this.plugin.settings.myLightModeThemeName = value;
+					await this.plugin.saveSettings();
+				});
+			});
+
+		new Setting(this.containerEl)
+			.setName('Check dark/light mode at startup').setDesc('Useful if "Base color scheme" is set to "Adapt to system"')
 			.addToggle(async toggle => {
 				toggle.setValue(this.plugin.settings.startupCheck);
 				toggle.onChange(async (value) => {
