@@ -1,6 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
+import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 interface DoubleSwitchSettings {
 	myDarkModeThemeName: string;
@@ -18,7 +16,7 @@ const DEFAULT_SETTINGS: DoubleSwitchSettings = {
 
 export default class DoubleSwitchPlugin extends Plugin {
 	settings: DoubleSwitchSettings;
-	darkModeBefore = document.body.hasClass('theme-dark');
+	darkModeBefore = activeDocument.body.hasClass('theme-dark');
 
 	async onload() {
 		await this.loadSettings();
@@ -28,7 +26,7 @@ export default class DoubleSwitchPlugin extends Plugin {
 
 		// Core logic of the app
 		this.registerEvent(this.app.workspace.on('css-change', () => {
-			const darkModeNow = document.body.hasClass('theme-dark');
+			const darkModeNow = activeDocument.body.hasClass('theme-dark');
 			if (this.darkModeBefore != darkModeNow) {
 				this.darkModeBefore = darkModeNow;
 				this.setTheme(darkModeNow ? this.settings.myDarkModeThemeName : this.settings.myLightModeThemeName);
@@ -37,7 +35,7 @@ export default class DoubleSwitchPlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady(() => {
 			if (this.settings.startupCheck) {
-				const darkModeNow = document.body.hasClass('theme-dark');
+				const darkModeNow = activeDocument.body.hasClass('theme-dark');
 				this.setTheme(darkModeNow ? this.settings.myDarkModeThemeName : this.settings.myLightModeThemeName);
 			}
 		});
@@ -117,12 +115,12 @@ class MySettingTab extends PluginSettingTab {
 			});
 	}
 
-	getThemes(): any[] {
+	getThemes(): string[] {
 		//@ts-ignore
 		return [this.DEFAULT_THEME_KEY, ...Object.keys(this.app.customCss.themes), ...this.app.customCss.oldThemes];
 	}
 
-	getThemeNames(item: any): string {
+	getThemeNames(item: string): string {
 		if (item === this.DEFAULT_THEME_KEY) {
 			return this.DEFAULT_THEME_TEXT;
 		} else {

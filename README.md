@@ -1,4 +1,4 @@
-# Double-Switch Plugin
+# Auto switch themes between dark/light mode
 
 Do you switch between Dark and Light modes but prefer different themes? Then this plugin might be for you. It automatically switches themes when the dark/light mode setting changes.
 Choose your themes in the settings.
