@@ -25,6 +25,7 @@ jobs:
         run: |
           npm install
           npm run build
+
       - name: Generate artifact attestation
         uses: actions/attest@v4
         with:
