@@ -1,9 +1,9 @@
 {
 	"id": "double-switch",
-	"name": "Auto switch themes between dark/light mode",
-	"version": "0.7.0",
+	"name": "Auto switch themes between dark and light mode",
+	"version": "0.8.5",
 	"minAppVersion": "0.15.0",
-	"description": "Toggling dark/light mode switches themes automatically",
+	"description": "Toggling dark/light mode switches themes automatically.",
 	"author": "Robert Storlind",
 	"authorUrl": "https://github.com/carlrobert",
 	"isDesktopOnly": false
