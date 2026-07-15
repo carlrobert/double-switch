@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, requireApiVersion, type SettingDefinitionItem } from 'obsidian';
 
 interface DoubleSwitchSettings {
 	myDarkModeThemeName: string;
@@ -71,17 +71,57 @@ class MySettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		if (!requireApiVersion('1.13.0')) {
+			return [];
+		}
+
+		const themeOptions = this.buildThemeOptions();
+
+		return [
+			{
+				name: 'Theme to use with dark mode',
+				desc: 'Pick from your installed themes',
+				control: {
+					type: 'dropdown',
+					key: 'myDarkModeThemeName',
+					defaultValue: DEFAULT_SETTINGS.myDarkModeThemeName,
+					options: themeOptions,
+				},
+			},
+			{
+				name: 'Theme to use with light mode',
+				desc: 'Pick from your installed themes',
+				control: {
+					type: 'dropdown',
+					key: 'myLightModeThemeName',
+					defaultValue: DEFAULT_SETTINGS.myLightModeThemeName,
+					options: themeOptions,
+				},
+			},
+			{
+				name: 'Check dark/light mode at startup',
+				desc: 'Useful if "Base color scheme" is set to "Adapt to system"',
+				control: {
+					type: 'toggle',
+					key: 'startupCheck',
+					defaultValue: DEFAULT_SETTINGS.startupCheck,
+				},
+			},
+		];
+	}
+
 	display(): void {
 		const { containerEl } = this;
 
 		containerEl.empty();
+		const themeOptions = this.buildThemeOptions();
 
 		new Setting(this.containerEl)
 			.setName('Theme to use with dark mode').setDesc('Pick from your installed themes')
 			.addDropdown(async dropdown => {
-				dropdown.addOption(NOSWITCH, NOSWITCH)
-				for (const key of Object.values(this.getThemes())) {
-					dropdown.addOption(key, this.getThemeNames(key));
+				for (const [key, name] of Object.entries(themeOptions)) {
+					dropdown.addOption(key, name);
 				}
 				dropdown.setValue(this.plugin.settings.myDarkModeThemeName);
 				dropdown.onChange(async (value) => {
@@ -93,9 +133,8 @@ class MySettingTab extends PluginSettingTab {
 		new Setting(this.containerEl)
 			.setName('Theme to use with light mode').setDesc('Pick from your installed themes')
 			.addDropdown(async dropdown => {
-				dropdown.addOption(NOSWITCH, NOSWITCH)
-				for (const key of Object.values(this.getThemes())) {
-					dropdown.addOption(key, this.getThemeNames(key));
+				for (const [key, name] of Object.entries(themeOptions)) {
+					dropdown.addOption(key, name);
 				}
 				dropdown.setValue(this.plugin.settings.myLightModeThemeName);
 				dropdown.onChange(async (value) => {
@@ -113,6 +152,16 @@ class MySettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				});
 			});
+	}
+
+	private buildThemeOptions(): Record<string, string> {
+		const themeOptions: Record<string, string> = {
+			[NOSWITCH]: NOSWITCH,
+		};
+		for (const key of this.getThemes()) {
+			themeOptions[key] = this.getThemeNames(key);
+		}
+		return themeOptions;
 	}
 
 	getThemes(): string[] {
