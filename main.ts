@@ -1,4 +1,4 @@
-import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Plugin, PluginSettingTab, Setting, type SettingDefinitionItem } from 'obsidian';
 
 interface DoubleSwitchSettings {
 	myDarkModeThemeName: string;
@@ -71,6 +71,44 @@ class MySettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	// 1.13.0+: Obsidian calls this and skips the legacy `display()` implementation below
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		const themeOptions = this.buildThemeOptions();
+
+		return [
+			{
+				name: 'Theme to use with dark mode',
+				desc: 'Pick from your installed themes',
+				control: {
+					type: 'dropdown',
+					key: 'myDarkModeThemeName',
+					defaultValue: DEFAULT_SETTINGS.myDarkModeThemeName,
+					options: themeOptions,
+				},
+			},
+			{
+				name: 'Theme to use with light mode',
+				desc: 'Pick from your installed themes',
+				control: {
+					type: 'dropdown',
+					key: 'myLightModeThemeName',
+					defaultValue: DEFAULT_SETTINGS.myLightModeThemeName,
+					options: themeOptions,
+				},
+			},
+			{
+				name: 'Check dark/light mode at startup',
+				desc: 'Useful if "Base color scheme" is set to "Adapt to system"',
+				control: {
+					type: 'toggle',
+					key: 'startupCheck',
+					defaultValue: DEFAULT_SETTINGS.startupCheck,
+				},
+			},
+		];
+	}
+
+	// < 1.13.0: Obsidian calls this legacy implementation
 	display(): void {
 		const { containerEl } = this;
 
@@ -113,6 +151,16 @@ class MySettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				});
 			});
+	}
+
+	private buildThemeOptions(): Record<string, string> {
+		const themeOptions: Record<string, string> = {
+			[NOSWITCH]: NOSWITCH,
+		};
+		for (const key of this.getThemes()) {
+			themeOptions[key] = this.getThemeNames(key);
+		}
+		return themeOptions;
 	}
 
 	getThemes(): string[] {
