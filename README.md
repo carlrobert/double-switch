@@ -7,7 +7,7 @@ Choose your themes in the settings.
 
 ---
 
-Thanks <3 to ProudBenzene and Tyce Herrmann for contributing improvements to the plugin.
+Thanks <3 to ProudBenzene and TyceHerrmann for contributing improvements to the plugin.
 
 # Sources
 This plugin is based on

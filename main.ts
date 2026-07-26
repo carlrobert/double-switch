@@ -71,6 +71,7 @@ class MySettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	// 1.13.0+: Obsidian calls this and skips the legacy `display()` implementation below
 	getSettingDefinitions(): SettingDefinitionItem[] {
 		const themeOptions = this.buildThemeOptions();
 
@@ -107,6 +108,7 @@ class MySettingTab extends PluginSettingTab {
 		];
 	}
 
+	// < 1.13.0: Obsidian calls this legacy implementation
 	display(): void {
 		const { containerEl } = this;
 
